@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏴‍☠️ One Piece Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .chat-header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+            background-image: url('images/PunkRecords.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-content {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .user-message .message-content {
+            background: rgba(102,126,234,0.92);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message {
+            justify-content: flex-start;
+        }
+
+        .bot-message .message-content {
+            background: rgba(255,255,255,0.92);
+            color: #333;
+            border: 1px solid rgba(224,224,224,0.9);
+            border-bottom-left-radius: 4px;
+        }
+
+        /* subtle overlay to help readability */
+        .messages::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.04);
+            pointer-events: none;
+        }
+
+        .chat-header img.logo {
+            height: 36px;
+            width: auto;
+            display: inline-block;
+            vertical-align: middle;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.06);
+            padding: 2px 4px;
+        }
+
+        .loading {
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .input-area {
+            display: flex;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            gap: 10px;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .reset-btn {
+            padding: 10px 20px;
+            background: #e74c3c;
+            font-size: 13px;
+        }
+
+        /* Scrollbar personnalisée */
+        .messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .chat-header h1 {
+                font-size: 22px;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1><img src="images/File History - One Piece Logo PNG Transparent With Clear Background ID 203193 _ TopPNG-removebg-preview.jpg" alt="One Piece Logo" class="logo"> One Piece Expert Chatbot</h1>
+            <p>Discutez, analysez, théorisez sur One Piece !</p>
+            <button class="reset-btn" onclick="resetConversation()">Nouvelle conversation</button>
+        </div>
+        
+        <div class="messages" id="messages"></div>
+        
+        <div class="input-area">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="userInput" 
+                    placeholder="Posez votre question sur One Piece..."
+                    autocomplete="off"
+                />
+            </div>
+            <button onclick="sendMessage()" id="sendBtn">Envoyer</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_URL = 'http://localhost:8000/chat';
+        let conversationHistory = [];
+        let isLoading = false;
+
+        // Fonction pour ajouter un message à l'interface
+        function addMessage(content, type, isLoading = false) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            const messageId = 'msg-' + Date.now();
+            
+            messageDiv.id = messageId;
+            messageDiv.className = `message ${type}-message`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = `message-content ${isLoading ? 'loading' : ''}`;
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(contentDiv);
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            
+            return messageId;
+        }
+
+        // Fonction pour envoyer un message
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const message = input.value.trim();
+            
+            if (!message || isLoading) return;
+
+            // Désactiver l'input pendant l'envoi
+            isLoading = true;
+            input.disabled = true;
+            sendBtn.disabled = true;
+
+            // Afficher le message utilisateur
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Afficher le message de chargement
+            const loadingId = addMessage('Le bot réfléchit', 'bot', true);
+
+            try {
+                // Envoyer la requête à l'API
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        history: conversationHistory
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Retirer le message de chargement
+                document.getElementById(loadingId).remove();
+
+                // Afficher la réponse du bot
+                addMessage(data.response, 'bot');
+
+                // Mettre à jour l'historique
+                conversationHistory = data.history;
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById(loadingId).remove();
+                addMessage(
+                    '❌ Erreur de connexion. Vérifiez que le backend est lancé (http://localhost:8000)',
+                    'bot'
+                );
+            } finally {
+                // Réactiver l'input
+                isLoading = false;
+                input.disabled = false;
+                sendBtn.disabled = false;
+                input.focus();
+            }
+        }
+
+        // Fonction pour réinitialiser la conversation
+        function resetConversation() {
+            if (confirm('Voulez-vous vraiment recommencer la conversation ?')) {
+                conversationHistory = [];
+                document.getElementById('messages').innerHTML = '';
+                addMessage(
+                    'Nouvelle conversation démarrée ! Posez-moi vos questions sur One Piece.',
+                    'bot'
+                );
+            }
+        }
+
+        // Envoyer avec la touche Entrée
+        document.getElementById('userInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !isLoading) {
+                sendMessage();
+            }
+        });
+
+        // Message de bienvenue
+        window.addEventListener('load', () => {
+            addMessage(
+                'Salut ! Je suis ton expert One Piece. Avant de commencer, dis-moi : jusqu\'à quel chapitre as-tu lu ?',
+                'bot'
+            );
+        });
+    </script>
+</body>
+</html>
