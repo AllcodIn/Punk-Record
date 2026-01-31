@@ -270,7 +270,7 @@
 
     <script>
         // Configuration
-        const API_URL = 'http://localhost:8000/chat';
+        const API_URL = 'https://punk-record.onrender.com';
         let conversationHistory = [];
         let isLoading = false;
 
@@ -346,7 +346,7 @@
                 console.error('Erreur:', error);
                 document.getElementById(loadingId).remove();
                 addMessage(
-                    '❌ Erreur de connexion. Vérifiez que le backend est lancé (http://localhost:8000)',
+                    '❌ Erreur de connexion. Vérifiez que le backend est lancé (https://punk-record.onrender.com)',
                     'bot'
                 );
             } finally {
