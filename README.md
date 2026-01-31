@@ -81,6 +81,29 @@ Invoke-RestMethod -Uri http://localhost:8000/chat -Method POST -Body (@{
 ---
 
 If you want, I can also commit this README to Git and create a short commit message.
+# Deployment
+
+This repository is designed to serve a static frontend and a separate backend that holds the `GEMINI_API_KEY` secret. Recommended deployment pattern:
+
+1. Host the backend on a server that can store secrets and run Python (Render, Fly, Cloud Run, Railway, or a VPS).
+  - Example (Render): create a Web Service using the `backend` folder as the deploy root, set the start command to:
+    ```bash
+    python main_http.py
+    ```
+  - Add an environment variable `GEMINI_API_KEY` in the host's dashboard (do not put the key in frontend code).
+
+2. Deploy the static frontend to Vercel (recommended) and proxy API calls to your backend using `vercel.json`.
+  - Add the `vercel.json` at the repo root (example included in repo): it rewrites `/chat` and `/health` to your backend URL.
+  - With the rewrite in place, the frontend can call `/chat` without exposing your backend domain in code.
+
+3. If you prefer direct API calls (no proxy rewrite), set `API_URL` in `frontend/index.html` to your backend full URL and ensure CORS is configured on the backend.
+
+Security notes:
+- Never commit `GEMINI_API_KEY` to the repo or expose it in the frontend.
+- Use provider environment variables and restrict access where possible.
+
+Advanced: If you want to convert the backend to Vercel Serverless Functions, I can help refactor `backend` into an API folder and add Vercel-compatible handlers, but be aware of execution time limits and cold start implications.
+
 # PunkRecord — One Piece Chatbot
 
 This project contains a FastAPI backend and a static frontend to chat with a One Piece expert persona.

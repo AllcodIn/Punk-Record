@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/chat", "destination": "https://punk-record.onrender.com/chat" },
+    { "source": "/health", "destination": "https://punk-record.onrender.com/health" }
+  ]
+}
